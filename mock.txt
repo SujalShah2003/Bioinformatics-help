@@ -1,0 +1,70 @@
+Q1)
+makeblastdb -in HSA_Proteins.fasta -dbtype prot -out HSADB
+blastp -query ThiQ.fasta -db HSADB -out Thiq_to_HSA -evalue 1E-04 -outfmt 6
+awk '{print $2}' Thiq_to_HSA  | sort | uniq -c | awk '$1 > 1' | wc -l
+
+Q2)
+psiblast -query SRY.fasta -db HSADB -num_iterations=3 -evalue 1E-04 -out psi_SRY_to_HSA -out_pssm=PSSM3
+awk '{print $2}' psi_SRY_to_HSA | sort -u | wc -l
+
+q3)
+
+q4) type mega
+click file> open file>click on align>alignment>by clustal or muscle>all ok>
+phylogeny>nj>adjust para acc
+
+Q6) blastp -db HSADB -query ThiQ.fasta -out Thiq_to_HSA_max -evalue 1e-04 -outfmt 6 -max_target_seqs 1
+
+type needle(this is for global)
+Input sequence: ThiQ.fasta
+Second sequence(s): best_homo_ThiQ.fasta
+provide parameters and file name
+
+type water(this is for local)
+Input sequence: ThiQ.fasta
+Second sequence(s): best_homo_ThiQ.fasta
+provide parameters and file name
+
+q7) in q6 your pwd should be blastdb and in that you should have sry.fasta file 
+blastp -query SRY.fasta -db swissprot -evalue 1e-04  -out SRY_to_HSA -outfmt 6
+
+awk '$3>=60 && $3<70 {print}' SRY_to_HSA|head -5 > SRY_60_69.txt
+awk '$3>=70 && $3<80 {print}' SRY_to_HSA|head -5 > SRY_70_79.txt
+awk '$3>=80 && $3<90 {print}' SRY_to_HSA|head -5 > SRY_80_89.txt
+awk '$3>=90 && $3<=100 {print}' SRY_to_HSA|head -5 > SRY_90_100.txt
+
+q8)to do msa we should first have seq from the above que instead we have id now using a shell script and files from prev que we will extract out fasta seq
+1) copy paste all filtered blast result from q6 in one file 
+2) name it as  seq_q7_blastp
+3)create 1.sh that has:
+for id in cut -c11-18 seq_q7_blastp
+	do
+		wget https://rest.uniprot.org/uniprotkb/id.fasta
+		
+	done
+4)run on shell: bash 1.sh
+5)do cat *.fasta > combined_sequences.txt(it will copy all fasta seq into one file)
+6)then do any method clustalw,clustalo,tcoffee
+
+in case this is not workking then do this:
+1)
+cut -f2 SRY_60_69.txt | while read id; do blastdbcmd -db nr -entry "$id" >> SRY_Homologs.fasta; done
+
+cut -f2 SRY_70_79.txt | while read id; do blastdbcmd -db nr -entry "$id" >> SRY_Homologs.fasta; done
+
+cut -f2 SRY_80_89.txt | while read id; do blastdbcmd -db nr -entry "$id" >> SRY_Homologs.fasta; done
+
+cut -f2 SRY_90_100.txt | while read id; do blastdbcmd -db nr -entry "$id" >> SRY_Homologs.fasta; done
+
+2)
+grep ">" SRY_Homologs.fasta | wc -l(to check total no. of sequences)
+
+3)use clustalw,clustalo or t_coffee
+
+
+
+
+	
+
+
+

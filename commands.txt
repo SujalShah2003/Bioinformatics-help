@@ -1,0 +1,133 @@
+To make a data base
+makeblastdb -in filename with extension -dbtype prot/nt etc -out filename to be saved with
+
+-remote: Directs BLAST to use NCBI’s online servers
+
+To do a blast:
+blastp -db db namw -query inputfilename -out filename to be saved with -evalue 1e-04 -outfmt 6
+BLASTN:
+blastn -db dbname -query input filename -out output filename -evalue 1e-04 -outfmt 6
+
+blastn -task dc-megablast -db <name> -query <input filename> -out <output filename> -evalue 1e-04 -outfmt 6
+
+blastn -task megablast -db <name> -query <input filename> -out <output filename> -evalue 1e-04 -outfmt 6
+
+BLASTX
+makeblastdb -in < name> -dbtype prot -out <output filename>
+blastx -db <name> -query <input filename> -out <output filename> -evalue 1e-04 -outfmt 6
+
+tblastn
+makeblastdb -in <name> -dbtype nucl -out <output dbname>
+tblastn -db <name> -query <input sequence> -out <output file name> -evalue 1e-04 -outfmt 6
+
+tblastx
+tblastx:
+Query: Nucleotides (translated in 6 frames)
+makeblastdb -in <input filename> -dbtype nucl -out <output filename>
+tblastx -db <name> -query <input file name> -out <output file name> -evalue 1e-04 -outfmt 6
+
+html
+makeblastdb -in < > -out <> -dbtype <nucl> -hash_index
+
+blastn -query <name> -task blastn -db <name> -out <name.html> -evalue 10 -html
+
+PSI BLAST
+makeblastdb -in <INPUT FILE NAME> -dbtype prot -out <output filename>
+blastp -db <dbname> -query <input filename> -out <output file name> -evalue 1e-04 -outfmt 6
+
+psiblast -query < > -db < > -num_iterations=1 -evalue=0.01 -out < > -out_pssm=PSSM1
+psiblast -query < > -db < > -num_iterations=2 -evalue=0.01 -out < > -out_pssm=PSSM2
+psiblast -query < > -db < > -num_iterations=3 -evalue=0.01 -out < > -out_pssm=PSSM3
+psiblast -query < > -db < > -num_iterations=4 -evalue=0.01 -out < > -out_pssm=PSSM4
+
+PHI BLAST
+psiblast -phi_pattern RBP_pattern.txt -db HP -query RBP.fasta -max_target_seqs 100 -out phi_RBP_output.txt
+
+FILTERING OUT BLAST RESULTS:
+List the header lines:
+grep ">" filename with extension
+
+grep -c ">" filename with extension(Count the number of sequences)
+grep -c "^>" filename with extension(to avoid repetition)
+grep -i "transcription factor" filename with extension
+grep "Homo sapiens" results.txt > filtered_human_results.txt
+
+head -10 filename(first 10 seq)
+to get only one top hit in the target database:
+blastp -db <name> -query <name> -out <name> -evalue 1e-04 -outfmt 6 -max_target_seqs 1
+
+awk '{print $2}' ThiQ_vs_HSA.txt | sort | uniq -c | awk '$1 > 1' | wc -l(to have unique hits)
+awk '$2 >= 90' results.txt > filtered_results.txt
+awk '$column number >= required %' input filename > output filename
+
+awk '$3>=60 && $3<70 {print}' SRYblast1|head -5
+awk '$3>=70 && $3<80 {print}' SRYblast1|head -5
+ awk '$3>=80&& $3<90 {print}' SRYblast1|head -5
+awk '$3>=90 && $3<100 {print}' SRYblast1|head -5
+
+
+TO DO LOCAL and GLOBAL pairwise alignment:
+we can type jemboss and do it from there or
+
+LOCAL:
+ ex- needle -asequence ./aseq.txt -bsequence ./bseq.txt
+ Generalized: needle -asequence ./aseq.txt -bsequence ./bseq.txt -gapopen 10 -gapextend 1 -outfile alignment.txt
+ 
+GLOBAL:https:water -asequence ./aseq.txt -bsequence ./bseq.txt
+
+using clustalo:
+clustalo -i ./aseq.txt -i ./bseq.txt --distmat-out=distance.txt --full --outfmt=clustal -o alignment.aln
+
+FOR DOING MSA:
+1) USING CLUSTALW
+Type clustalw
+Read and select from the menu (1 sequence input)
+enter name of file having sequence 
+Read and select from the menu (2 perform  msa )
+Read and select from the menu (1 perform full msa )
+output file name for msa out
+output file name for guide tree(.dnd)
+
+for doing msa this we should have  sequences first:
+
+ for id in cut -c15-20 HBB1-to-HP_blastp
+	do
+		wget https://rest.uniprot.org/uniprotkb/id.fasta
+		
+	done
+	
+bash name.sh
+cat *.fasta > combined_sequences.txt
+clustalw/clustalo etc
+	
+USING CLUSTALO:
+
+clustalo --infile=seq-no-outlier.txt  --output-order=input-order --outfile=seq-cl-off.aln --wrap=60 --outfmt=clu --force
+
+GENERAL:clustalo -i sequences.fasta -o alignment.aln --outfmt=clustal
+
+USING TCOFFEE:
+t_coffee seq-no-outlier.txt -mode=expresso -template_file 1i54.pdb
+t_coffee -infile=sequences.fasta -mode=accurate -output=clustalw -outfile=alignment.aln
+
+USING MUSTANG:
+This will extract only 1 chain from both pdb files a chain and d chain.
+awk '($1~"^ATOM$" && $5~"^D$")' 3aqu.pdb  > 3aqu_d.pdb
+awk '($1~"^ATOM$" && $5~"^B$")' 1w9p.pdb  > 1w9p_b.pdb
+
+mustang -i 1w9p_b.pdb 3aqu_d.pdb -o<output filname>
+
+then VISUALIZATION:
+using 1) pymol:pymol aligned_structures.pdb/out filename
+      2)chimera:chimera --nogui aligned_structures.pdb(nogui if running on remote server)
+
+to open html file do open filename.html
+
+
+MOTIF FINDING:
+USING MEME:
+meme sequences.fa -dna -oc . -nostatus -time 14400 -mod zoops -nmotifs 3 -minw 6 -maxw 10 -objfun classic -revcomp -markov_order 0
+
+meme DNA_motif_casestudy.txt -dna -oc . -nostatus -time 14400 -mod zoops -nmotifs 3 -minw 6 -maxw 10 -objfun classic -revcomp -markov_order 0
+
+
