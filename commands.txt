@@ -3,7 +3,7 @@ makeblastdb -in filename with extension -dbtype prot/nt etc -out filename to be 
 
 -remote: Directs BLAST to use NCBI’s online servers
 
-To do a blast:
+To do a blast: 
 blastp -db db namw -query inputfilename -out filename to be saved with -evalue 1e-04 -outfmt 6
 BLASTN:
 blastn -db dbname -query input filename -out output filename -evalue 1e-04 -outfmt 6
